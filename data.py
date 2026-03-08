@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 def _empty_state():
     return {
-        "total_credits": 0,
+        "total_credits": 330,
         "history": [],
         "flare_mode": False,
         "last_update_id": 0,
