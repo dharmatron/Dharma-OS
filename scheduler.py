@@ -26,6 +26,9 @@ def _check_schedule():
 
     data = load_data()
 
+    if data.get("flare_mode", False):
+        pass
+
     # Skip if snoozed
     if time.time() < data.get("snooze_until", 0):
         return
