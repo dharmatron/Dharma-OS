@@ -43,16 +43,16 @@ def _check_schedule():
                 logger.info(f"Reminder sent for: {med_name}")
                 time.sleep(61)  # Prevent duplicate alerts in same minute
 
-def _daily_init():
-    """Award System Init credits once per day on first run."""
+def _daily_init():  # Award System Init credits once per day on first run #
+    
     import pytz
     cdmx_tz = pytz.timezone(TIMEZONE)
     today = datetime.now(cdmx_tz).strftime("%Y-%m-%d")
     data = load_data()
 
-    already_init = any(
-        e["task"] == "System Init" and e["timestamp"].startswith(today)
-        for e in data["history"]
+    already_init = any(   # Improved Check: Look specifically for today's "System Init"
+        e.get("task") == "System Init" and e.get("timestamp", "").startswith(today)
+        for e in data.get("history", [])
     )
 
     if not already_init:
@@ -64,6 +64,9 @@ def _daily_init():
             f"First meds due at {list(MED_SCHEDULE.keys())[0]} 💊"
         )
         logger.info("Daily init complete.")
+        
+    else:   # If already init, we just log it silently so it doesn't spam you
+        logger.info("System already initialized for today. Skipping points/message.")
 
 def _scheduler_loop():
     """Main scheduler loop. Checks every 30 seconds."""
