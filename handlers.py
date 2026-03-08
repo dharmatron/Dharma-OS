@@ -107,6 +107,33 @@ def handle_electrolytes(_: str) -> None:
         f"Balance: {result['total']} pts"
     )
 
+def handle_sanctuary(text: str):
+    data = load_data()
+    # Define the core self-care tasks
+    tasks = {
+        "🚿 Shower": 50,
+        "🪥 Teeth": 20,
+        "🧹 Room": 40,
+        "👕 Laundry": 30,
+        "🍼 Clean Water Bottle": 15
+        "💧 Refill Water": 15
+    }
+    
+    normalized = text.lower().strip()
+    
+    if "✨ sanctuary" in normalized:
+        menu = "✨ **Sanctuary Checklist**\n_Self-care is the ultimate quest._\n\n"
+        for task, pts in tasks.items():
+            menu += f"{task} (+{pts} pts)\n"
+        send_message(menu + "\nTap a button or type the task name!")
+        return
+
+    # Check if they typed a task name
+    for task, pts in tasks.items():
+        if task.lower() in normalized:
+            res = add_credits(f"Sanctuary: {task}", pts)
+            send_message(f"✨ **Sanctuary Restored:** {task}\n+{pts} pts | Total: {res['total']} pts\nYou're doing great, Architect.")
+
 def handle_quests(text: str):
     data = load_data()
     if "quests" not in data:
