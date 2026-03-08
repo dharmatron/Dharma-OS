@@ -26,6 +26,29 @@ def get_main_keyboard() -> dict:
         "one_time_keyboard": False,
     }
 
+def send_sanctuary_menu():
+    """Sends an inline menu for Sanctuary tasks to avoid main menu clutter."""
+    from telegram_client import BASE_URL
+    import requests
+    
+    # Buttons with callback_data so the bot knows exactly what was clicked
+    keyboard = {
+        "inline_keyboard": [
+            [{"text": "🚿 Shower", "callback_data": "sanc_shower"}, {"text": "🪥 Teeth", "callback_data": "sanc_teeth"}],
+            [{"text": "💧 Refill Water", "callback_data": "sanc_refill"}, {"text": "🍼 Clean Bottle", "callback_data": "sanc_bottle"}],
+            [{"text": "🐕 Umi walkies", "callback_data": "sanc_umi"}, {"text": "🐕 Meditation", "callback_data": "sanc_meditation"}],
+            [{"text": "👕 Laundry", "callback_data": "sanc_laundry"}, {"text": "🧹 Room", "callback_data": "sanc_room"}],
+        ]
+    }
+    
+    payload = {
+        "chat_id": CHAT_ID,
+        "text": "✨ **Sanctuary Checklist**\n_Select a task to restore your environment._",
+        "parse_mode": "Markdown",
+        "reply_markup": json.dumps(keyboard)
+    }
+    requests.post(f"{BASE_URL}/sendMessage", json=payload)
+
 def send_message(text: str, chat_id: str = None, with_menu: bool = True) -> bool:
     """Send a message, optionally with the main keyboard."""
     target = chat_id or CHAT_ID
