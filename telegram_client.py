@@ -14,12 +14,12 @@ def get_main_keyboard() -> dict:
     """The main button grid shown after every response."""
     return {
         "keyboard": [
-            [{"text": "💊 Meds"},        {"text": "📊 Vitals"}],
-            [{"text": "🥤 Electrolytes"}, {"text": "⚔️ Quests"}], 
+            [{"text": "💊 Meds"}, {"text": "📊 Vitals"}],
+            [{"text": "🥤 Electrolytes"}, {"text": "⚔️ Quests"}],
+            [{"text": "✨ Sanctuary"}, {"text": "🚨 Flare Mode"}],
+            [{"text": "💤 Snooze 15m"}, {"text": "🏁 Milestones"}],
             [{"text": "📷 Scan Monitor"}, {"text": "✏️ Custom"}], 
-            [{"text": "🚨 Flare Mode"}, {"text": "🏁 Milestones"}],
-            [{"text": "📈 Status"}, {"text": "🛠️ Fix Last"}], 
-            [{"text": "💤 Snooze 15m"}, {"text": "📤 Export"}],
+            [{"text": "📈 Status"}, {"text": "🛠️ Fix Last"}, {"text": "📤 Export"}],
         
         ],
         "resize_keyboard": True,
