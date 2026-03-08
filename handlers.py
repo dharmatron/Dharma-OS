@@ -237,6 +237,25 @@ def handle_emergency_test(_: str) -> None:
 
 # ── ROUTER ───────────────────────────────────────────────────────────────────
 
+# Add this function above COMMAND_MAP
+def handle_restore(text: str):
+    from data import save_data
+    new_data = {
+        "total_credits": 350,
+        "history": [{"timestamp": _now_cdmx().strftime("%Y-%m-%d %H:%M:%S"), "task": "Cloud Migration Success", "points": 350, "flare": False}],
+        "flare_mode": False,
+        "snooze_until": 0
+    }
+    save_data(new_data)
+    send_message("🛡️ **RESTORATION COMPLETE**: Points set to 350 on permanent volume.")
+
+# Then add it to the COMMAND_MAP at the bottom
+COMMAND_MAP = {
+    # ... your other commands ...
+    "restore":          handle_restore,
+    "/restore":         handle_restore,
+}
+
 COMMAND_MAP = {
     "💊 meds":          handle_meds,
     "meds":             handle_meds,
@@ -260,7 +279,10 @@ COMMAND_MAP = {
     "📷 scan monitor":  handle_scan_monitor,
     "scan":             handle_scan_monitor,
     "/emergency_test":  handle_emergency_test,
+    "restore":          handle_restore,
+    "/restore":         handle_restore,
 }
+
 
 def route(text: str, photo_file_id: str = None) -> None:
     """Route an incoming message to the correct handler."""
