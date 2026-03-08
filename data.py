@@ -10,6 +10,7 @@ import logging
 from datetime import datetime
 from config import DATA_FILE, TIMEZONE
 import pytz
+DATA_FILE = "/app/data/health_credits.json"
 
 logger = logging.getLogger(__name__)
 
