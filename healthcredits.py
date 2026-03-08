@@ -42,7 +42,7 @@ MED_SCHEDULE = {
 
 def load_data():
     if not os.path.exists(DATA_FILE):
-        return {"total_credits": 0, "history": [], "flare_mode": False}
+        return {"total_credits": 330, "history": [], "flare_mode": False}
     with open(DATA_FILE, 'r') as f:
         return json.load(f)
 
@@ -73,8 +73,8 @@ def add_credits(task_name, points):
             d2 = datetime.strptime(med_time, fmt)
             diff_mins = (d1 - d2).total_seconds() / 60
 
-            # If you are more than 5 minutes late, apply a small penalty to the reward
-            if 5 < diff_mins <= 30:
+            # If you are more than 15 minutes late, apply a small penalty to the reward
+            if 15 < diff_mins <= 30:
                 final_points -= 10
                 send_alert(f"⚠️ Grace period (5m) exceeded. Penalty applied to reward.")
             elif diff_mins > 30:
