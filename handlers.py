@@ -107,6 +107,44 @@ def handle_electrolytes(_: str) -> None:
         f"Balance: {result['total']} pts"
     )
 
+def handle_quests(text: str):
+    data = load_data()
+    if "quests" not in data:
+        data["quests"] = []
+
+    normalized = text.lower().strip()
+    
+    if normalized in ["⚔️ quests", "quests"]:     # 1. Show Active Quests
+        if not data["quests"]:
+            send_message("⚔️ **No active Quests.**\nType `quest [item]` to add one (e.g., `quest buy puffed rice`).")
+        else:
+            quest_list = "\n".join([f"{i+1}. {q}" for i, q in enumerate(data["quests"])])
+            send_message(f"⚔️ **Active Quests:**\n\n{quest_list}\n\n_Type 'done [number]' to complete one (+5 pts)_")
+        return
+    
+    if normalized.startswith("quest "): # 2. Add a Quest
+        new_quest = text[6:].strip()
+        data["quests"].append(new_quest)
+        save_data(data)
+        send_message(f"📜 **Quest Accepted:** {new_quest}")
+
+   
+    elif normalized.startswith("done "):   # 3. Complete a Quest (Earn Credits!)
+        try:
+            idx = int(normalized.split(" ")[1]) - 1
+            if 0 <= idx < len(data["quests"]):
+                completed = data["quests"].pop(idx)
+
+                save_data(data)  # Save first to update list
+                
+                res = add_credits(f"Quest: {completed}", 5)   # Reward the architect
+                send_message(f"🏆 **Quest Complete:** {completed}\n+5 pts | New Balance: {res['total']} pts")
+            else:
+                send_message("❌ Invalid quest number.")
+        except ValueError:
+            send_message("❌ Please use a number (e.g., `done 1`).")
+
+
 def handle_flare(_: str) -> None:
     data = load_data()
     new_status = not data.get("flare_mode", False)
@@ -263,6 +301,10 @@ COMMAND_MAP = {
     "vitals":           handle_vitals,
     "🥤 electrolytes":  handle_electrolytes,
     "electrolytes":     handle_electrolytes,
+    "⚔️ quests":       handle_quests,
+    "quests":          handle_quests,
+    "quest":           handle_quests,
+    "done":            handle_quests,
     "🚨 flare mode":    handle_flare,
     "flare":            handle_flare,
     "📈 status":        handle_status,
