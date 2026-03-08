@@ -115,7 +115,7 @@ def handle_sanctuary(text: str):
         "🪥 Teeth": 20,
         "🧹 Room": 40,
         "👕 Laundry": 30,
-        "🍼 Clean Water Bottle": 15
+        "🍼 Clean Water Bottle": 15,
         "💧 Refill Water": 15
     }
     
