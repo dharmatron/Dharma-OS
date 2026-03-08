@@ -24,7 +24,7 @@ def _empty_state() -> dict:
     return {
         "total_credits": 0,  # Start at 0, don't hardcode your 350 here!
         "history": [],
-        "last_update": datetime.now().isoformat()
+        "last_update": datetime.now().isoformat(),
         "flare_mode": False,
         "snooze_until": 0,
     }
