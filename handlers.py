@@ -111,12 +111,15 @@ def handle_sanctuary(text: str):
     data = load_data()
     # Define the core self-care tasks
     tasks = {
-        "🚿 Shower": 50,
+        "🚿 Shower": 40,
         "🪥 Teeth": 20,
+        "💧 Refill Water": 15,
+        "🍼 Clean Water Bottle": 15
+        "🐕Umi Walkies": 50,
+        "🧘 Meditation": 25, 
         "🧹 Room": 40,
         "👕 Laundry": 30,
-        "🍼 Clean Water Bottle": 15,
-        "💧 Refill Water": 15
+        
     }
     
     normalized = text.lower().strip()
