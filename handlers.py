@@ -108,20 +108,26 @@ def handle_electrolytes(_: str) -> None:
     )
 
 def handle_sanctuary(text: str):
+    # If they just tapped the main "Sanctuary" button
+    if "sanctuary" in text.lower():
+        from telegram_client import send_sanctuary_menu
+        send_sanctuary_menu()
+        return
+
+    # Logic for processing the actual completion
     data = load_data()
-    # Define the core self-care tasks
     tasks = {
-        "🚿 Shower": 40,
-        "🪥 Teeth": 20,
-        "💧 Refill Water": 15,
-        "🍼 Clean Water Bottle": 15
-        "🐕Umi Walkies": 50,
-        "🧘 Meditation": 25, 
-        "🧹 Room": 40,
-        "👕 Laundry": 30,
-        
+        "sanc_shower": ("🚿 Shower": 40),
+        "sanc_teeth":  ("🪥 Teeth", 20),
+        "sanc_refill": ("💧 Refill Water", 10),
+        "sanc_bottle": ("🍼 Clean Water Bottle", 20),
+        "sanc_refill": ("💧 Refill Water", 10),
+        "sanc_walkies": ("🐕Umi Walkies": 50),
+        "sanc_meditation": ("🧘 Meditation": 25),
+        "sanc_room":   ("🧹 Room", 40),
+        "sanc_laundry":("👕 Laundry", 30)
     }
-    
+
     normalized = text.lower().strip()
     
     if "✨ sanctuary" in normalized:
@@ -130,12 +136,31 @@ def handle_sanctuary(text: str):
             menu += f"{task} (+{pts} pts)\n"
         send_message(menu + "\nTap a button or type the task name!")
         return
+        
+    # Match the incoming text/callback to the task
+    for key, (name, pts) in tasks.items():
+        if key in text or name.lower() in text.lower():
+            # --- HYDRATION STREAK LOGIC ---
+            bonus = 0
+            if "bottle" in key or "refill" in key:
+                data["water_streak"] = data.get("water_streak", 0) + 1
+                if data["water_streak"] >= 3:
+                    bonus = 20
+                    data["water_streak"] = 0 # Reset
+                    msg_bonus = "\n🔥 **HYDRATION STREAK!** (+20 bonus pts)"
+                else:
+                    msg_bonus = ""
+            else:
+                msg_bonus = ""
 
-    # Check if they typed a task name
-    for task, pts in tasks.items():
-        if task.lower() in normalized:
-            res = add_credits(f"Sanctuary: {task}", pts)
-            send_message(f"✨ **Sanctuary Restored:** {task}\n+{pts} pts | Total: {res['total']} pts\nYou're doing great, Architect.")
+            res = add_credits(f"Sanctuary: {name}", pts + bonus)
+            save_data(data)
+            send_message(f"✨ **Sanctuary Restored:** {name}\n+{pts + bonus} pts{msg_bonus}\nTotal: {res['total']} pts\nYou're doing great, Architect."")
+            return
+
+    # If it reached here, it's a true unknown
+    send_message("❓ Task not recognized in Sanctuary.")
+                         
 
 def handle_quests(text: str):
     data = load_data()
