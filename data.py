@@ -13,12 +13,13 @@ import pytz
 
 logger = logging.getLogger(__name__)
 
-def _empty_state():
+def _empty_state() -> dict:
+    """The default state if no JSON exists."""
     return {
-        "total_credits": 330,
+        "total_credits": 0,  # Start at 0, don't hardcode your 350 here!
         "history": [],
+        "last_update": datetime.now().isoformat()
         "flare_mode": False,
-        "last_update_id": 0,
         "snooze_until": 0,
     }
 
