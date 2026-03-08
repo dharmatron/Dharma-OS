@@ -15,10 +15,12 @@ def get_main_keyboard() -> dict:
     return {
         "keyboard": [
             [{"text": "💊 Meds"},        {"text": "📊 Vitals"}],
-            [{"text": "🥤 Electrolytes"}, {"text": "🚨 Flare Mode"}],
-            [{"text": "📈 Status"},       {"text": "🏁 Milestones"}],
-            [{"text": "✏️ Custom"},       {"text": "🛠️ Fix Last"}, {"text": "📤 Export"}],
-            [{"text": "💤 Snooze 15m"},   {"text": "📷 Scan Monitor"}],
+            [{"text": "🥤 Electrolytes"}, {"text": "⚔️ Quests"}], 
+            [{"text": "📷 Scan Monitor"}, {"text": "✏️ Custom"}], 
+            [{"text": "🚨 Flare Mode"}, {"text": "🏁 Milestones"}],
+            [{"text": "📈 Status"}, {"text": "🛠️ Fix Last"}], 
+            [{"text": "💤 Snooze 15m"}, {"text": "📤 Export"}],
+        
         ],
         "resize_keyboard": True,
         "one_time_keyboard": False,
