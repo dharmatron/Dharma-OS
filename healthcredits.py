@@ -408,10 +408,3 @@ while True:
         pass
 
     time.sleep(3) #
-
-# --- EMERGENCY DATA OVERWRITE ---
-data = load_data()
-data["total_credits"] = 300 # Granting you the "System Architect" bonus
-data["history"].append({"timestamp": "2024-05-18 23:35:00", "task": "Architect Bonus", "points": 50})
-save_data(data)
-print(f"🚀 SYSTEM OVERRIDE: Your balance is now {load_data()['total_credits']} pts.")
