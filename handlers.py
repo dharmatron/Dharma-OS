@@ -155,7 +155,7 @@ def handle_sanctuary(text: str):
 
             res = add_credits(f"Sanctuary: {name}", pts + bonus)
             save_data(data)
-            send_message(f"✨ **Sanctuary Restored:** {name}\n+{pts + bonus} pts{msg_bonus}\nTotal: {res['total']} pts\nYou're doing great, Architect."")
+            send_message(f"✨ **Sanctuary Restored:** {name}\n+{pts + bonus} pts{msg_bonus}\nTotal: {res['total']} pts\nYou're doing great, Architect.")
             return
 
     # If it reached here, it's a true unknown
