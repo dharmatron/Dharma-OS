@@ -117,7 +117,7 @@ def handle_sanctuary(text: str):
     # Logic for processing the actual completion
     data = load_data()
     tasks = {
-        "sanc_shower": ("🚿 Shower": 40),
+        "sanc_shower": ("🚿 Shower", 40),
         "sanc_teeth":  ("🪥 Teeth", 20),
         "sanc_refill": ("💧 Refill Water", 10),
         "sanc_bottle": ("🍼 Clean Water Bottle", 20),
