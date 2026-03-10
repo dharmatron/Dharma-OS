@@ -127,8 +127,8 @@ def handle_sanctuary(text: str):
         "sanc_refill": ("💧 Refill Water", 10),
         "sanc_bottle": ("🍼 Clean Water Bottle", 20),
         "sanc_refill": ("💧 Refill Water", 10),
-        "sanc_walkies": ("🐕Umi Walkies": 50),
-        "sanc_meditation": ("🧘 Meditation": 25),
+        "sanc_walkies": ("🐕Umi Walkies", 50),
+        "sanc_meditation": ("🧘 Meditation", 25),
         "sanc_room":   ("🧹 Room", 40),
         "sanc_laundry":("👕 Laundry", 30)
     }
