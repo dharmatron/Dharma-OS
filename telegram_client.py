@@ -36,7 +36,7 @@ def send_sanctuary_menu():
         "inline_keyboard": [
             [{"text": "🚿 Shower", "callback_data": "sanc_shower"}, {"text": "🪥 Teeth", "callback_data": "sanc_teeth"}],
             [{"text": "💧 Refill Water", "callback_data": "sanc_refill"}, {"text": "🍼 Clean Bottle", "callback_data": "sanc_bottle"}],
-            [{"text": "🐕 Umi walkies", "callback_data": "sanc_umi"}, {"text": "🐕 Meditation", "callback_data": "sanc_meditation"}],
+            [{"text": "🐕 Umi walkies", "callback_data": "sanc_walkies"}, {"text": "🐕 Meditation", "callback_data": "sanc_meditation"}],
             [{"text": "👕 Laundry", "callback_data": "sanc_laundry"}, {"text": "🧹 Room", "callback_data": "sanc_room"}],
         ]
     }
