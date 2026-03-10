@@ -11,7 +11,7 @@ from data import (
     set_flare_mode, set_snooze, export_to_csv, get_progress_bar,
     check_meds_taken_today
 )
-from telegram_client import send_message, send_document, send_emergency_alert
+from telegram_client import send_message, send_document, send_emergency_alert, get_sanctuary_keyboard, get_main_keyboardsend_message
 import pytz
 
 logger = logging.getLogger(__name__)
@@ -108,14 +108,19 @@ def handle_electrolytes(_: str) -> None:
     )
 
 def handle_sanctuary(text: str):
+    data = load_data()
+    normalized = text.lower().strip()
+    
     # If they just tapped the main "Sanctuary" button
     if "sanctuary" in text.lower():
         from telegram_client import send_sanctuary_menu
         send_sanctuary_menu()
         return
 
-    # Logic for processing the actual completion
-    data = load_data()
+    if "sanctuary" in normalized:
+        send_message("✨ **Sanctuary Mode**\n_Self-care is the ultimate quest._\n\n", custom_keyboard=get_sanctuary_keyboard())
+        return
+
     tasks = {
         "sanc_shower": ("🚿 Shower", 40),
         "sanc_teeth":  ("🪥 Teeth", 20),
@@ -127,15 +132,25 @@ def handle_sanctuary(text: str):
         "sanc_room":   ("🧹 Room", 40),
         "sanc_laundry":("👕 Laundry", 30)
     }
-
-    normalized = text.lower().strip()
     
-    if "✨ sanctuary" in normalized:
-        menu = "✨ **Sanctuary Checklist**\n_Self-care is the ultimate quest._\n\n"
-        for task, pts in tasks.items():
-            menu += f"{task} (+{pts} pts)\n"
-        send_message(menu + "\nTap a button or type the task name!")
-        return
+    for key, (display_name, pts) in tasks.items():
+        if key in normalized:
+            bonus = 0
+            if key in ["bottle", "refill"]:             # --- HYDRATION STREAK LOGIC ---
+                data["water_streak"] = data.get("water_streak", 0) + 1
+                if data["water_streak"] >= 3:
+                    bonus = 20
+                    data["water_streak"] = 0 # Reset
+                    msg = "\n🔥 **HYDRATION STREAK!** (+20 bonus pts)"
+                else:
+                    msg = ""
+            else:
+                msg = ""
+
+            res = add_credits(f"Sanctuary: {display_name}", pts + bonus)
+            save_data(data)
+            send_message(f"✨ **Sanctuary Restored:** {display_name}\n+{pts+bonus} pts{msg}\nTotal: {res['total']} pts\nYou're doing great, Architect."")
+            return
         
     # Match the incoming text/callback to the task
     for key, (name, pts) in tasks.items():
@@ -157,9 +172,6 @@ def handle_sanctuary(text: str):
             save_data(data)
             send_message(f"✨ **Sanctuary Restored:** {name}\n+{pts + bonus} pts{msg_bonus}\nTotal: {res['total']} pts\nYou're doing great, Architect.")
             return
-
-    # If it reached here, it's a true unknown
-    send_message("❓ Task not recognized in Sanctuary.")
                          
 
 def handle_quests(text: str):
