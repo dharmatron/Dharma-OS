@@ -30,7 +30,7 @@ def get_sanctuary_keyboard() -> dict:
         "keyboard": [
             [{"text": "🚿 Shower"}, {"text": "🪥 Teeth"}],
             [{"text": "💧 Refill Water"}, {"text": "🍼 Clean Bottle"}],
-            [{"text": "🐕 Umi walkies"}, {"text": "🐕 Meditation"}]
+            [{"text": "🐕 Umi walkies"}, {"text": "🧘 Meditation"}],
             [{"text": "🧹 Room"},   {"text": "👕 Laundry"}],
             [{"text": "⬅️ Back"}]
         ],
