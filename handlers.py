@@ -107,51 +107,12 @@ def handle_electrolytes(_: str) -> None:
     )
 
 def handle_sanctuary(text: str):
-    data = load_data()
-    normalized = text.lower().strip()
-    
-    # If they just tapped the main "Sanctuary" button
-    if "sanctuary" in text.lower():
-        from telegram_client import send_sanctuary_menu
-        send_sanctuary_menu()
-        return
-
-    if "sanctuary" in normalized:
-        send_message("✨ **Sanctuary Mode**\n_Self-care is the ultimate quest._\n\n", custom_keyboard=get_sanctuary_keyboard())
-        return
-        
-    tasks = {
-        "shower": ("🚿 Shower", 40),
-        "teeth": ("🪥 Teeth", 20),
-        "refill": ("💧 Refill Water", 10),
-        "bottle": ("🍼 Clean Water Bottle", 20),
-        "walkies": ("🐕Umi Walkies", 50),
-        "meditation": ("🧘 Meditation", 25),
-        "room": ("🧹 Room", 40),
-        "laundry":("👕 Laundry", 30)
-    }
-    
-    for key, (display_name, pts) in tasks.items():
-        if key in normalized:
-            bonus = 0
-            if key in ["bottle", "refill"]:             # --- HYDRATION STREAK LOGIC ---
-                data["water_streak"] = data.get("water_streak", 0) + 1
-                if data["water_streak"] >= 3:
-                    bonus = 20
-                    data["water_streak"] = 0 # Reset
-                    msg = "\n🔥 **HYDRATION STREAK!** (+20 bonus pts)"
-                else:
-                    msg = ""
-            else:
-                msg = ""
-
-            res = add_credits(f"Sanctuary: {display_name}", pts + bonus)
-            save_data(data)
-            send_message(f"✨ **Sanctuary Restored:** {display_name}\n+{pts+bonus} pts{msg}\nTotal: {res['total']} pts\You're doing great, Architect.")
-            return
-
-def handle_back(text: str):
-    send_message("🛡️ Returning to Main Menu.", with_menu=True)                         
+    """Switch to the Sanctuary sub-menu."""
+    send_message(
+        "✨ *SANCTUARY MODE*\nRestoring the environment is a core pillar of your stability.\nSelect a task to begin:",
+        with_menu=True, 
+        custom_keyboard=get_sanctuary_keyboard()
+    )                        
 
 def handle_quests(text: str):
     data = load_data()
