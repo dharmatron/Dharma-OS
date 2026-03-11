@@ -10,11 +10,13 @@ from config import TOKEN, CHAT_ID, EMERGENCY_CIRCLE, ALERT_LEVELS
 logger = logging.getLogger(__name__)
 BASE_URL = f"https://api.telegram.org/bot{TOKEN}"
 
+# --- telegram_client.py (Updated Keyboards) ---
+
 def get_main_keyboard() -> dict:
-    """The main button grid."""
+    """The central navigation hub."""
     return {
         "keyboard": [
-            [{"text": "💊 Meds"},        {"text": "📊 Vitals"}],
+            [{"text": "💊 Meds"},         {"text": "📊 Vitals"}],
             [{"text": "🥤 Electrolytes"}, {"text": "⚔️ Quests"}], 
             [{"text": "✨ Sanctuary"},    {"text": "🚨 Flare Mode"}], 
             [{"text": "💤 Snooze 15m"}, {"text": "🏁 Milestones"}],
@@ -24,14 +26,24 @@ def get_main_keyboard() -> dict:
         "resize_keyboard": True
     }
 
-def get_sanctuary_keyboard() -> dict:
-    """The self-care sub-menu."""
+def get_meds_keyboard() -> dict:
+    """The Medication Node."""
     return {
         "keyboard": [
-            [{"text": "🚿 Shower"}, {"text": "🪥 Teeth"}],
+            [{"text": "💉 Log Meds"},     {"text": "📋 View Schedule"}],
+            [{"text": "⚙️ Change Meds"},  {"text": "⬅️ Back"}]
+        ],
+        "resize_keyboard": True
+    }
+
+def get_sanctuary_keyboard() -> dict:
+    """The Self-Care Node."""
+    return {
+        "keyboard": [
+            [{"text": "🚿 Shower"},       {"text": "🪥 Teeth"}],
             [{"text": "💧 Refill Water"}, {"text": "🍼 Clean Bottle"}],
             [{"text": "🐕 Umi walkies"}, {"text": "🧘 Meditation"}],
-            [{"text": "🧹 Room"},   {"text": "👕 Laundry"}],
+            [{"text": "🧹 Room"},         {"text": "👕 Laundry"}],
             [{"text": "⬅️ Back"}]
         ],
         "resize_keyboard": True
