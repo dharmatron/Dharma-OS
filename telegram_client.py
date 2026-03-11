@@ -11,62 +11,47 @@ logger = logging.getLogger(__name__)
 BASE_URL = f"https://api.telegram.org/bot{TOKEN}"
 
 def get_main_keyboard() -> dict:
-    """The main button grid shown after every response."""
+    """The main button grid."""
     return {
         "keyboard": [
-            [{"text": "💊 Meds"}, {"text": "📊 Vitals"}],
-            [{"text": "🥤 Electrolytes"}, {"text": "⚔️ Quests"}],
-            [{"text": "✨ Sanctuary"}, {"text": "🚨 Flare Mode"}],
+            [{"text": "💊 Meds"},        {"text": "📊 Vitals"}],
+            [{"text": "🥤 Electrolytes"}, {"text": "⚔️ Quests"}], 
+            [{"text": "✨ Sanctuary"},    {"text": "🚨 Flare Mode"}], 
             [{"text": "💤 Snooze 15m"}, {"text": "🏁 Milestones"}],
             [{"text": "📷 Scan Monitor"}, {"text": "✏️ Custom"}], 
-            [{"text": "📈 Status"}, {"text": "🛠️ Fix Last"}, {"text": "📤 Export"}],
-        
+            [{"text": "📈 Status"}, {"text": "🛠️ Fix Last"}, {"text": "📤 Export"}]
         ],
-        "resize_keyboard": True,
-        "one_time_keyboard": False,
+        "resize_keyboard": True
     }
 
-def send_sanctuary_menu():
-    """Sends an inline menu for Sanctuary tasks to avoid main menu clutter."""
-    from telegram_client import BASE_URL
-    import requests
-    
-    # Buttons with callback_data so the bot knows exactly what was clicked
-    keyboard = {
-        "inline_keyboard": [
-            [{"text": "🚿 Shower", "callback_data": "sanc_shower"}, {"text": "🪥 Teeth", "callback_data": "sanc_teeth"}],
-            [{"text": "💧 Refill Water", "callback_data": "sanc_refill"}, {"text": "🍼 Clean Bottle", "callback_data": "sanc_bottle"}],
-            [{"text": "🐕 Umi walkies", "callback_data": "sanc_walkies"}, {"text": "🐕 Meditation", "callback_data": "sanc_meditation"}],
-            [{"text": "👕 Laundry", "callback_data": "sanc_laundry"}, {"text": "🧹 Room", "callback_data": "sanc_room"}],
-        ]
+def get_sanctuary_keyboard() -> dict:
+    """The self-care sub-menu."""
+    return {
+        "keyboard": [
+            [{"text": "🚿 Shower"}, {"text": "🪥 Teeth"}],
+            [{"text": "💧 Refill Water"}, {"text": "🍼 Clean Bottle"}],
+            [{"text": "🐕 Umi walkies"}, {"text": "🐕 Meditation"}]
+            [{"text": "🧹 Room"},   {"text": "👕 Laundry"}],
+            [{"text": "⬅️ Back"}]
+        ],
+        "resize_keyboard": True
     }
-    
-    payload = {
-        "chat_id": CHAT_ID,
-        "text": "✨ **Sanctuary Checklist**\n_Select a task to restore your environment._",
-        "parse_mode": "Markdown",
-        "reply_markup": json.dumps(keyboard)
-    }
-    requests.post(f"{BASE_URL}/sendMessage", json=payload)
 
-def send_message(text: str, chat_id: str = None, with_menu: bool = True) -> bool:
-    """Send a message, optionally with the main keyboard."""
+def send_message(text: str, chat_id: str = None, with_menu: bool = True, custom_keyboard: dict = None) -> bool:
+    """Send a message with either the main, sanctuary, or no keyboard."""
     target = chat_id or CHAT_ID
-    payload = {
-        "chat_id": target,
-        "text": text,
-        "parse_mode": "Markdown",
-    }
-    if with_menu:
+    payload = {"chat_id": target, "text": text, "parse_mode": "Markdown"}
+    
+    if custom_keyboard:
+        payload["reply_markup"] = json.dumps(custom_keyboard)
+    elif with_menu:
         payload["reply_markup"] = json.dumps(get_main_keyboard())
 
     try:
         res = requests.post(f"{BASE_URL}/sendMessage", json=payload, timeout=10)
-        if not res.ok:
-            logger.error(f"Telegram send failed: {res.text}")
         return res.ok
-    except requests.RequestException as e:
-        logger.error(f"Telegram request error: {e}")
+    except Exception as e:
+        logger.error(f"Send error: {e}")
         return False
 
 def send_document(file_path: str, caption: str = "") -> bool:
