@@ -11,7 +11,7 @@ from data import (
     set_flare_mode, set_snooze, export_to_csv, get_progress_bar,
     check_meds_taken_today
 )
-from telegram_client import send_message, get_main_keyboard, get_sanctuary_keyboard, send_document, send_emergency_alert,
+from telegram_client import send_message, get_main_keyboard, get_sanctuary_keyboard, send_document, send_emergency_alert
 
 logger = logging.getLogger(__name__)
 
