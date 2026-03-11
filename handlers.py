@@ -342,27 +342,39 @@ COMMAND_MAP = {
     "/restore":         handle_restore,
 }
 
+KEYWORD_MAP = {
+    "sanctuary": handle_sanctuary,
+    "meds":      handle_meds_menu,
+    "back":      handle_back,
+    "flare":     handle_flare,
+    "status":    handle_status,
+    "shower":    handle_sanctuary_task, 
+    "teeth":     handle_sanctuary_task,
+    "refill":    handle_sanctuary_task,
+    "clean":     handle_sanctuary_task,
+    "umi walkies":    handle_sanctuary_task,
+    "meditation":     handle_sanctuary_task,
+    "room":    handle_sanctuary_task,
+    "laundry":     handle_sanctuary_task,
+    
+}
 
 def route(text: str, photo_file_id: str = None) -> None:
-    """Route an incoming message to the correct handler."""
+    """The system brain. Matches incoming text to logic."""
     if photo_file_id:
         handle_photo(photo_file_id)
         return
 
     normalized = text.lower().strip()
 
-    # Exact match first
-    if normalized in COMMAND_MAP:
-        COMMAND_MAP[normalized](normalized)
-        return
-
-    # Prefix match (e.g. "custom Walk the dog 20")
-    for key in COMMAND_MAP:
-        if normalized.startswith(key):
-            COMMAND_MAP[key](normalized)
+    # Iterate through keywords to find a match (Fuzzy Matching)
+    for keyword, handler in KEYWORD_MAP.items():
+        if keyword in normalized:
+            handler(normalized)
             return
 
-    # Unknown
-    send_message(
-        f"❓ I don't know *{text}*.\n\nUse the buttons below or type a command.",
-    )
+    # Fallback for dynamic commands like "quest [item]"
+    if normalized.startswith("quest"):
+        handle_new_quest(normalized)
+    elif normalized.startswith("done"):
+        handle_complete_quest(normalized)
