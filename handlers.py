@@ -11,7 +11,7 @@ from data import (
     set_flare_mode, set_snooze, export_to_csv, get_progress_bar,
     check_meds_taken_today
 )
-from telegram_client import send_message, get_main_keyboard, get_sanctuary_keyboard, send_document, send_emergency_alert
+from telegram_client import send_message, get_main_keyboard, get_sanctuary_keyboard, get_meds_keyboard, send_document, send_emergency_alert
 
 logger = logging.getLogger(__name__)
 
@@ -91,6 +91,14 @@ def handle_meds(_: str) -> None:
             f"Balance: {result['total']} pts"
         )
 
+def handle_meds_menu(text: str):
+    """Switch to the Meds management sub-menu."""
+    send_message(
+        "💊 *MEDICATION COMMAND*\nSelect an action to maintain your protocol:",
+        with_menu=True,
+        custom_keyboard=get_meds_keyboard()
+    )
+
 def handle_vitals(_: str) -> None:
     result = add_credits("Manual Vitals Check", POINTS["vitals"])
     send_message(
@@ -151,6 +159,22 @@ def handle_quests(text: str):
         except ValueError:
             send_message("❌ Please use a number (e.g., `done 1`).")
 
+def handle_status(text: str):
+    data = load_data()
+    mode = "🚨 FLARE" if data.get("flare_mode") else "🟢 NORMAL"
+    bar = get_progress_bar(data["total_credits"], TARGET_GOAL)
+    msg = (
+        f"📈 *SYSTEM STATUS*\n"
+        f"Mode: {mode}\n"
+        f"Balance: *{data['total_credits']} pts*\n"
+        f"Goal: {bar}\n"
+        f"Remaining: {max(0, TARGET_GOAL - data['total_credits'])} pts"
+    )
+    send_message(msg, with_menu=True)
+
+def handle_back(text: str):
+    """Return to the main hub."""
+    send_message("🛰️ *MAIN HUB*\nSystem ready for command.", with_menu=True, custom_keyboard=get_main_keyboard())
 
 def handle_flare(_: str) -> None:
     data = load_data()
@@ -169,10 +193,6 @@ def handle_flare(_: str) -> None:
             "🟢 *NORMAL MODE RESTORED*\n\n"
             "Great job getting through that. Standard scoring resumed."
         )
-
-def handle_status(_: str) -> None:
-    data = load_data()
-    send_message(_status_block(data))
 
 def handle_milestones(_: str) -> None:
     data  = load_data()
@@ -346,6 +366,7 @@ KEYWORD_MAP = {
     "sanctuary": handle_sanctuary,
     "meds":      handle_meds_menu,
     "back":      handle_back,
+    "⬅️":       handle_back,
     "flare":     handle_flare,
     "status":    handle_status,
     "shower":    handle_sanctuary_task, 
@@ -356,6 +377,8 @@ KEYWORD_MAP = {
     "meditation":     handle_sanctuary_task,
     "room":    handle_sanctuary_task,
     "laundry":     handle_sanctuary_task,
+    "back":      handle_back,
+    "status":    handle_status,
     
 }
 
@@ -363,6 +386,7 @@ def route(text: str, photo_file_id: str = None) -> None:
     """The system brain. Matches incoming text to logic."""
     if photo_file_id:
         handle_photo(photo_file_id)
+        # handle_photo implementation would go here
         return
 
     normalized = text.lower().strip()
