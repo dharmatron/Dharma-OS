@@ -25,9 +25,6 @@ def _check_schedule():
     today = now.strftime("%Y-%m-%d")
 
     data = load_data()
-
-    flare_active = data.get("flare_mode", False)
-    
     
     if time.time() < data.get("snooze_until", 0):
         return
@@ -44,12 +41,9 @@ def _check_schedule():
                 logger.info(f"Reminder sent for: {med_name}")
                 time.sleep(61)
                 
-                if flare_active:
+                if data.get("flare_mode", False):
                     from data import set_snooze
                     set_snooze(30)
-                    logger.info("Flare Mode: Auto-snoozed for 30m.")
-                
-                time.sleep(61)
                                 
 
 def _daily_init():  # Award System Init credits once per day on first run #
