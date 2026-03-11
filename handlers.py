@@ -11,8 +11,7 @@ from data import (
     set_flare_mode, set_snooze, export_to_csv, get_progress_bar,
     check_meds_taken_today
 )
-from telegram_client import send_message, send_document, send_emergency_alert, get_sanctuary_keyboard, get_main_keyboardsend_message
-import pytz
+from telegram_client import send_message, get_main_keyboard, get_sanctuary_keyboard, send_document, send_emergency_alert,
 
 logger = logging.getLogger(__name__)
 
@@ -120,17 +119,16 @@ def handle_sanctuary(text: str):
     if "sanctuary" in normalized:
         send_message("✨ **Sanctuary Mode**\n_Self-care is the ultimate quest._\n\n", custom_keyboard=get_sanctuary_keyboard())
         return
-
+        
     tasks = {
-        "sanc_shower": ("🚿 Shower", 40),
-        "sanc_teeth":  ("🪥 Teeth", 20),
-        "sanc_refill": ("💧 Refill Water", 10),
-        "sanc_bottle": ("🍼 Clean Water Bottle", 20),
-        "sanc_refill": ("💧 Refill Water", 10),
-        "sanc_walkies": ("🐕Umi Walkies", 50),
-        "sanc_meditation": ("🧘 Meditation", 25),
-        "sanc_room":   ("🧹 Room", 40),
-        "sanc_laundry":("👕 Laundry", 30)
+        "shower": ("🚿 Shower", 40),
+        "teeth": ("🪥 Teeth", 20),
+        "refill": ("💧 Refill Water", 10),
+        "bottle": ("🍼 Clean Water Bottle", 20),
+        "walkies": ("🐕Umi Walkies", 50),
+        "meditation": ("🧘 Meditation", 25),
+        "room": ("🧹 Room", 40),
+        "laundry":("👕 Laundry", 30)
     }
     
     for key, (display_name, pts) in tasks.items():
@@ -149,30 +147,11 @@ def handle_sanctuary(text: str):
 
             res = add_credits(f"Sanctuary: {display_name}", pts + bonus)
             save_data(data)
-            send_message(f"✨ **Sanctuary Restored:** {display_name}\n+{pts+bonus} pts{msg}\nTotal: {res['total']} pts\nYou're doing great, Architect."")
+            send_message(f"✨ **Sanctuary Restored:** {display_name}\n+{pts+bonus} pts{msg}\nTotal: {res['total']} pts\You're doing great, Architect.")
             return
-        
-    # Match the incoming text/callback to the task
-    for key, (name, pts) in tasks.items():
-        if key in text or name.lower() in text.lower():
-            # --- HYDRATION STREAK LOGIC ---
-            bonus = 0
-            if "bottle" in key or "refill" in key:
-                data["water_streak"] = data.get("water_streak", 0) + 1
-                if data["water_streak"] >= 3:
-                    bonus = 20
-                    data["water_streak"] = 0 # Reset
-                    msg_bonus = "\n🔥 **HYDRATION STREAK!** (+20 bonus pts)"
-                else:
-                    msg_bonus = ""
-            else:
-                msg_bonus = ""
 
-            res = add_credits(f"Sanctuary: {name}", pts + bonus)
-            save_data(data)
-            send_message(f"✨ **Sanctuary Restored:** {name}\n+{pts + bonus} pts{msg_bonus}\nTotal: {res['total']} pts\nYou're doing great, Architect.")
-            return
-                         
+def handle_back(text: str):
+    send_message("🛡️ Returning to Main Menu.", with_menu=True)                         
 
 def handle_quests(text: str):
     data = load_data()
@@ -372,10 +351,16 @@ COMMAND_MAP = {
     "quests":          handle_quests,
     "quest":           handle_quests,
     "done":            handle_quests,
-    "✨ sanctuary":     handle_sanctuary,
-    "shower":          handle_sanctuary,
-    "teeth":           handle_sanctuary,
-    "bottle":          handle_sanctuary, 
+    "✨ sanctuary": handle_sanctuary,
+    "🚿 shower":     handle_sanctuary,
+    "🪥 teeth":      handle_sanctuary,
+    "🍼 clean bottle": handle_sanctuary,
+    "💧 refill water": handle_sanctuary,
+    "🐕Umi Walkies": handle_sanctuary,
+    "🧘 Meditation": handle_sanctuary,
+    "🧹 room":       handle_sanctuary,
+    "👕 laundry":    handle_sanctuary,
+    "⬅️ back":       handle_back,
     "🚨 flare mode":    handle_flare,
     "flare":            handle_flare,
     "📈 status":        handle_status,
