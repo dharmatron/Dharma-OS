@@ -148,16 +148,23 @@ def handle_back(text: str):
 # Yes, delete the old COMMAND_MAP. 
 # This KEYWORD_MAP handles fuzzy matches and emojis perfectly.
 KEYWORD_MAP = {
-    # 1. High Priority (Specific Phrases)
+    # 1. Medication Hub 
     "log meds":  med_hub.start_sequence,
+    "retro":   med_hub.start_retroactive_log, 
     "taken":     med_hub.process_confirmation,
     "skip":      med_hub.process_confirmation,
     "schedule":  med_hub.view_schedule,
     "shift":     med_hub.apply_med_override,
     "change":    med_hub.handle_change_meds_start,
+    # Dynamic Window Handlers (Fuzzy Match)
+    "log 06":  lambda t: med_hub.init_retro_session("06:00"),
+    "log 08":  lambda t: med_hub.init_retro_session("08:00"),
+    "log 14":  lambda t: med_hub.init_retro_session("14:00"),
+    "log 20":  lambda t: med_hub.init_retro_session("20:00"),
+    "log 22":  lambda t: med_hub.init_retro_session("22:00"),
     "emergency": handle_emergency_test,
     
-    # 2. Nodes (Menu Swapping)
+    # 2. Navigation Nodes (Menu Swapping)
     "meds":      handle_meds_node,
     "sanctuary": handle_sanctuary_node,
     "quests":    handle_quest_node,
