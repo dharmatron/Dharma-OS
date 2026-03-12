@@ -419,25 +419,36 @@ COMMAND_MAP = {
 }
 
 KEYWORD_MAP = {
-    "meds":      handle_meds_menu,
-    "taken":     handle_task_generic,
-    "vitals": handle_task_generic,
+    
+    "log meds":  handle_log_meds_start, # Move this to the top
+    "export walmart": handle_export_walmart,
+    
+    # 2. SUB-MENU NAVIGATION
     "sanctuary": handle_sanctuary,
-    "flare":     handle_flare,
-    "status":    handle_status,
-    "shower":    handle_task_generic, 
-    "teeth":     handle_task_generic,
-    "refill":    handle_task_generic,
-    "clean":     handle_task_generic,
-    "umi walkies":    handle_task_generic,
-    "meditation":     handle_task_generic,
-    "room":    handle_task_generic,
-    "laundry":     handle_task_generic,
+    "meds":      handle_meds_menu,      # General 'meds' comes after 'log meds'
+    "quests":    handle_quest_hub,
+    "vitals":    handle_vitals_hub,
     "back":      handle_back,
     "⬅️":       handle_back,
-    "default": handle_task_generic,
+    
+    # 3. CONFIRMATIONS & TOGGLES
+    "taken":     handle_med_confirmation,
+    "skip":      handle_med_confirmation,
+    "flare":     handle_flare,
+    "status":    handle_status,
+
+    # 4. UNIVERSAL ACTIONS
+    "shower": handle_task_generic, 
+    "teeth": handle_task_generic,
+    "refill": handle_task_generic, 
+    "clean": handle_task_generic,
+    "umi walkies":    handle_task_generic,
+    "meditation":     handle_task_generic,
+    "room": handle_task_generic, 
+    "laundry": handle_task_generic,
   
 }
+
 
 def route(text: str, photo_file_id: str = None) -> None:
     """The system brain. Matches incoming text to logic."""
