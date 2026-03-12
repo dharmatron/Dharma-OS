@@ -23,8 +23,6 @@ from google.colab import drive
 # 1. AUTH & PATHS
 drive.mount('/content/drive')
 DATA_FILE = "/content/drive/My Drive/health_credits.json"
-TOKEN = "8620321199:AAGzau2p0R8z5u8oM1kLr0d385aPTiWp1dA"
-CHAT_ID = "48862354"
 TARGET_GOAL = 2500
 
 print("✅ Authentication & Drive Sync Complete.")
