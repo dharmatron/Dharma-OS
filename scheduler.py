@@ -71,6 +71,9 @@ def _daily_init():  # Award System Init credits once per day on first run #
         
     else:   # If already init, we just log it silently so it doesn't spam you
         logger.info("System already initialized for today. Skipping points/message.")
+    
+    data["schedule_overrides"] = {}
+    save_data(data)
 
 def _scheduler_loop():
     """Main scheduler loop. Checks every 30 seconds."""
