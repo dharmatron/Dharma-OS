@@ -15,6 +15,18 @@ from telegram_client import send_message, get_main_keyboard, get_sanctuary_keybo
 
 logger = logging.getLogger(__name__)
 
+# Add this to the top of handlers.py
+TASK_VALUES = {
+    # Sanctuary Tasks
+    "shower": 40, "teeth": 20, "refill": 10, "clean": 20, "umi walkies": 50, "meditation": 25, "room": 50, "laundry": 30, 
+    # Meds (Individual confirmation)
+    "taken": 30, "skip": 0,
+    # Vitals
+    "vitals": 10, "scan": 15,
+    # Default fallback
+    "default": 20
+}
+
 # ── HELPERS ──────────────────────────────────────────────────────────────────
 
 def _now_cdmx():
@@ -194,6 +206,29 @@ def handle_flare(_: str) -> None:
             "Great job getting through that. Standard scoring resumed."
         )
 
+def handle_task_generic(text: str):
+    """The Universal Handler for all submenu actions."""
+    normalized = text.lower()
+    
+    # Find the matching point value from our map
+    points = TASK_VALUES.get("default") # Start with default
+    for keyword, value in TASK_VALUES.items():
+        if keyword in normalized:
+            points = value
+            break
+            
+    # Award the credits
+    res = add_credits(f"Task: {text.title()}", points)
+    
+    # Feedback to the Architect
+    send_message(
+        f"✅ *Action Logged*\n"
+        f"Task: {text.title()}\n"
+        f"Awarded: +{points} pts\n"
+        f"Total: {res['total']} pts", 
+        with_menu=True
+    )
+
 def handle_milestones(_: str) -> None:
     data  = load_data()
     bal   = data["total_credits"]
@@ -363,23 +398,24 @@ COMMAND_MAP = {
 }
 
 KEYWORD_MAP = {
-    "sanctuary": handle_sanctuary,
     "meds":      handle_meds_menu,
-    "back":      handle_back,
-    "⬅️":       handle_back,
+    "taken":     handle_task_generic,
+    "vitals": handle_task_generic,
+    "sanctuary": handle_sanctuary,
     "flare":     handle_flare,
     "status":    handle_status,
-    "shower":    handle_sanctuary_task, 
-    "teeth":     handle_sanctuary_task,
-    "refill":    handle_sanctuary_task,
-    "clean":     handle_sanctuary_task,
-    "umi walkies":    handle_sanctuary_task,
-    "meditation":     handle_sanctuary_task,
-    "room":    handle_sanctuary_task,
-    "laundry":     handle_sanctuary_task,
+    "shower":    handle_task_generic, 
+    "teeth":     handle_task_generic,
+    "refill":    handle_task_generic,
+    "clean":     handle_task_generic,
+    "umi walkies":    handle_task_generic,
+    "meditation":     handle_task_generic,
+    "room":    handle_task_generic,
+    "laundry":     handle_task_generic,
     "back":      handle_back,
-    "status":    handle_status,
-    
+    "⬅️":       handle_back,
+    "default": handle_task_generic,
+  
 }
 
 def route(text: str, photo_file_id: str = None) -> None:
