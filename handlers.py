@@ -4,6 +4,7 @@ Each button/command maps to a handler function.
 Clean, testable, easy to extend.
 """
 import logging
+import med_hub
 from datetime import datetime
 from config import MED_SCHEDULE, POINTS, GRACE_WARNING, GRACE_CUTOFF, TARGET_GOAL, TIMEZONE
 from data import (
@@ -12,13 +13,10 @@ from data import (
     check_meds_taken_today
 )
 from telegram_client import send_message, get_main_keyboard, get_sanctuary_keyboard, get_meds_keyboard, send_document, send_emergency_alert
-import med_hub
 
 logger = logging.getLogger(__name__)
 
-# Add this to the top of handlers.py
-TASK_VALUES = {
-    # Sanctuary Tasks
+# ── UNIVERSAL TASK VALUES ───────────────────────────────────────────────────
     "shower": 40, "teeth": 20, "refill": 10, "clean": 20, "umi walkies": 50, "meditation": 25, "room": 50, "laundry": 30, 
     # Meds (Individual confirmation)
     "taken": 30, "skip": 0,
@@ -73,12 +71,38 @@ def _grace_penalty(med_time: str) -> tuple[int, str]:
     else:
         return -1, f"🚫 Window closed (>{GRACE_CUTOFF}m). No points this dose."
 
-# ── COMMAND HANDLERS ─────────────────────────────────────────────────────────
+# ── CORE HANDLERS ───────────────────────────────────────────
+
+def handle_task_generic(text: str):
+    normalized = text.lower()
+    points = TASK_VALUES.get("default")
+    for kw, val in TASK_VALUES.items():
+        if kw in normalized:
+            points = val
+            break
+    res = add_credits(f"Task: {text.title()}", points)
+    send_message(f"✅ *Action Logged*\n+{points} pts | Balance: {res['total']} pts", with_menu=True)
+
+def handle_status(text: str):
+    data = load_data()
+    bar = get_progress_bar(data["total_credits"], TARGET_GOAL)
+    msg = f"📈 *SYSTEM STATUS*\nBalance: *{data['total_credits']} pts*\nGoal: {bar}"
+    send_message(msg, with_menu=True)
+
+def handle_back(text: str):
+    send_message("🛰️ *MAIN HUB*", with_menu=True, custom_keyboard=get_main_keyboard())
+
+# ── DOMAIN ROUTING ─────────────────────────────────────────────────────────
+
+def handle_sanctuary_node(text: str):
+    send_message(
+        "✨ *SANCTUARY*\nRestoring the environment is a core pillar of your stability.\nSelect a task to begin:",
+        with_menu=True, custom_keyboard=get_sanctuary_keyboard())
 
 def handle_meds_node(text: str):
-    """The Meds Sub-menu."""
-    send_message("💊 *MEDS COMMAND*", with_menu=True, custom_keyboard=get_meds_keyboard())
+    send_message("💊 *MEDS HUB*", with_menu=True, custom_keyboard=get_meds_keyboard())
 
+# ── COMMAND HANDLERS ─────────────────────────────────────────────────────────
 
 def handle_vitals(_: str) -> None:
     result = add_credits("Manual Vitals Check", POINTS["vitals"])
@@ -94,14 +118,6 @@ def handle_electrolytes(_: str) -> None:
         f"🥤 *Electrolytes logged!* +{result['final_points']} pts\n"
         f"Balance: {result['total']} pts"
     )
-
-def handle_sanctuary(text: str):
-    """Switch to the Sanctuary sub-menu."""
-    send_message(
-        "✨ *SANCTUARY MODE*\nRestoring the environment is a core pillar of your stability.\nSelect a task to begin:",
-        with_menu=True, 
-        custom_keyboard=get_sanctuary_keyboard()
-    )                        
 
 def handle_quests(text: str):
     data = load_data()
@@ -139,64 +155,6 @@ def handle_quests(text: str):
                 send_message("❌ Invalid quest number.")
         except ValueError:
             send_message("❌ Please use a number (e.g., `done 1`).")
-
-def handle_status(text: str):
-    data = load_data()
-    mode = "🚨 FLARE" if data.get("flare_mode") else "🟢 NORMAL"
-    bar = get_progress_bar(data["total_credits"], TARGET_GOAL)
-    msg = (
-        f"📈 *SYSTEM STATUS*\n"
-        f"Mode: {mode}\n"
-        f"Balance: *{data['total_credits']} pts*\n"
-        f"Goal: {bar}\n"
-        f"Remaining: {max(0, TARGET_GOAL - data['total_credits'])} pts"
-    )
-    send_message(msg, with_menu=True)
-
-def handle_back(text: str):
-    """Return to the main hub."""
-    send_message("🛰️ *MAIN HUB*\nSystem ready for command.", with_menu=True, custom_keyboard=get_main_keyboard())
-
-def handle_flare(_: str) -> None:
-    data = load_data()
-    new_status = not data.get("flare_mode", False)
-    set_flare_mode(new_status)
-
-    if new_status:
-        send_message(
-            "🚨 *FLARE MODE ACTIVATED*\n\n"
-            "All points doubled. Penalties suppressed.\n"
-            "You're doing great — just survive today.\n\n"
-            "_Tap 🚨 Flare Mode again to deactivate when you're better._"
-        )
-    else:
-        send_message(
-            "🟢 *NORMAL MODE RESTORED*\n\n"
-            "Great job getting through that. Standard scoring resumed."
-        )
-
-def handle_task_generic(text: str):
-    """The Universal Handler for all submenu actions."""
-    normalized = text.lower()
-    
-    # Find the matching point value from our map
-    points = TASK_VALUES.get("default") # Start with default
-    for keyword, value in TASK_VALUES.items():
-        if keyword in normalized:
-            points = value
-            break
-            
-    # Award the credits
-    res = add_credits(f"Task: {text.title()}", points)
-    
-    # Feedback to the Architect
-    send_message(
-        f"✅ *Action Logged*\n"
-        f"Task: {text.title()}\n"
-        f"Awarded: +{points} pts\n"
-        f"Total: {res['total']} pts", 
-        with_menu=True
-    )
 
 def handle_milestones(_: str) -> None:
     data  = load_data()
@@ -368,15 +326,19 @@ COMMAND_MAP = {
 
 KEYWORD_MAP = {
     
-    "log meds":  handle_log_meds_start, # Move this to the top
-    
-    # Main Navigation
-    "sanctuary": handle_sanctuary,
-    "meds":      handle_meds_menu,
+    # 1. Sequence Triggers (High Priority)
+    "log meds":  med_hub.start_sequence,
+    "taken":     med_hub.process_confirmation,
+    "skip":      med_hub.process_confirmation,
+    "schedule":  med_hub.view_schedule,
+
+    # 2. Sub-Menus
+    "meds":      handle_meds_node,
+    "sanctuary": handle_sanctuary_node,
     "back":      handle_back,
     "⬅️":       handle_back,
-
-    # Meds Sub-menuuSpecifics
+    
+    # Meds Sub-menu Specifics
     "log meds":  med_hub.start_sequence,
     "taken":     med_hub.process_confirmation,
     "skip":      med_hub.process_confirmation,
@@ -384,17 +346,8 @@ KEYWORD_MAP = {
     "change":    med_hub.handle_change_meds_start,
     "shift":     med_hub.apply_med_override,
     "edit":      med_hub.apply_med_override,# You can move view_schedule there too
-    
-    # SUB-MENU NAVIGATION
-    "meds":      handle_meds_node,
-    "sanctuary": handle_sanctuary,
-    "back":      handle_back,
-    
-    "⬅️":       handle_back,
-    
+   
     # 3. CONFIRMATIONS & TOGGLES
-    "taken":     handle_med_confirmation,
-    "skip":      handle_med_confirmation,
     "flare":     handle_flare,
     "status":    handle_status,
 
@@ -410,6 +363,13 @@ KEYWORD_MAP = {
   
 }
 
+def route(text: str, photo_file_id: str = None) -> None:
+    if photo_file_id: return
+    normalized = text.lower().strip()
+    for keyword, handler in KEYWORD_MAP.items():
+        if keyword in normalized:
+            handler(normalized)
+            return
 
 def route(text: str, photo_file_id: str = None) -> None:
     """The system brain. Matches incoming text to logic."""
@@ -427,7 +387,7 @@ def route(text: str, photo_file_id: str = None) -> None:
             return
 
     # Fallback for dynamic commands like "quest [item]"
-    if normalized.startswith("quest"):
-        handle_new_quest(normalized)
-    elif normalized.startswith("done"):
-        handle_complete_quest(normalized)
+    #if normalized.startswith("quest"):
+        #handle_new_quest(normalized)
+    #elif normalized.startswith("done"):
+        #handle_complete_quest(normalized)
