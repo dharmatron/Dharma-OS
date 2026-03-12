@@ -16,14 +16,15 @@ from telegram_client import send_message, get_main_keyboard, get_sanctuary_keybo
 
 logger = logging.getLogger(__name__)
 
+TASK_VALUES = {
 # ── UNIVERSAL TASK VALUES ───────────────────────────────────────────────────
-    "shower": 40, "teeth": 20, "refill": 10, "clean": 20, "umi walkies": 50, "meditation": 25, "room": 50, "laundry": 30, 
+    "shower": 40, "teeth": 20, "refill": 10, "clean": 20, "umi walkies": 50, "meditation": 25, "room": 40, "laundry": 30,
     # Meds (Individual confirmation)
     "taken": 30, "skip": 0,
     # Vitals
     "vitals": 10, "scan": 15,
     # Default fallback
-    "default": 20
+    "default": 20,
 }
 
 # ── HELPERS ──────────────────────────────────────────────────────────────────
