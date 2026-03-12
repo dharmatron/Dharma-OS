@@ -30,15 +30,22 @@ def start():
     def loop():
         while True:
             try:
-                _daily_init()     # Check for +50 daily points
-                _check_schedule() # Check for medication windows
+                # 1. Pulse Check
+                _daily_init()
+                _check_schedule()
+                
             except Exception as e:
-                print(f"Scheduler error: {e}")
+                # If something breaks, log it but DON'T kill the thread
+                print(f"🛰️ ALERT: Scheduler heartbeat skipped: {e}")
             
-            # Sleep for 60 seconds so we don't trigger the same minute twice
-            time.sleep(60) 
+            # Wait 60 seconds. 
+            # We use 55s to ensure we don't accidentally skip a minute 
+            # due to processing lag.
+            time.sleep(55) 
 
-    threading.Thread(target=loop, daemon=True).start()
+    thread = threading.Thread(target=loop, daemon=True)
+    thread.start()
+    print("🛰️ Guardian Heartbeat Started.")
 
 def _daily_init():  # Award System Init credits once per day on first run #
     
