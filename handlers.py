@@ -12,6 +12,7 @@ from data import (
     check_meds_taken_today
 )
 from telegram_client import send_message, get_main_keyboard, get_sanctuary_keyboard, get_meds_keyboard, send_document, send_emergency_alert
+import med_hub
 
 logger = logging.getLogger(__name__)
 
@@ -74,64 +75,11 @@ def _grace_penalty(med_time: str) -> tuple[int, str]:
 
 # ── COMMAND HANDLERS ─────────────────────────────────────────────────────────
 
-def handle_meds(_: str) -> None:
-    med_time, med_name = _find_current_med()
+def handle_meds_node(text: str):
+    """The Meds Sub-menu."""
+    send_message("💊 *MEDS COMMAND*", with_menu=True, custom_keyboard=get_meds_keyboard())
 
-    if not med_time:
-        send_message("💊 No scheduled meds right now. Use ✏️ Custom to log an off-schedule dose.")
-        return
 
-    penalty_pts, penalty_msg = _grace_penalty(med_time)
-
-    if penalty_pts == -1:
-        # Window closed
-        send_message(f"🚫 *{med_name}* window closed.\nNo points awarded — but your health still matters! Log it with ✏️ Custom.")
-        return
-
-    result = add_credits(f"Meds: {med_name}", POINTS["meds_on_time"])
-    final = result["final_points"]
-
-    if penalty_pts > 0:
-        deduct_credits("Late med penalty", penalty_pts)
-        final -= penalty_pts
-        send_message(f"💊 *{med_name}* logged.\n{penalty_msg}\nNet: +{final} pts {'*(FLARE x2)*' if result['flare_active'] else ''}")
-    else:
-        bar = get_progress_bar(result["total"], TARGET_GOAL)
-        send_message(
-            f"💊 *Meds logged!* +{final} pts {'*(FLARE x2!)*' if result['flare_active'] else ''}\n"
-            f"{bar}\n"
-            f"Balance: {result['total']} pts"
-        )
-
-def handle_meds_menu(text: str):
-    """Switch to the Meds management sub-menu."""
-    send_message(
-        "💊 *MEDICATION COMMAND*\nSelect an action to maintain your protocol:",
-        with_menu=True,
-        custom_keyboard=get_meds_keyboard()
-    )
-
-def handle_log_meds_start(text: str):
-    data = load_data()
-    
-    # Check if a session is already active to prevent double-prompts
-    if data.get("med_session"):
-        logger.info("💊 Med session already in progress. Skipping trigger.")
-        return
-
-    window = _get_current_window()
-    if not window:
-        send_message("⚠️ No active med window found.")
-        return
-    
-    meds = MED_SCHEDULE[window].split(" + ")
-    data["med_session"] = {"window": window, "meds": meds, "index": 0}
-    save_data(data)
-    
-    # The Alert Message
-    msg = f"💊 *MEDS TIME: {window}*\nNext: **{meds[0]}**\nConfirm intake:"
-    send_message(msg, with_menu=True, custom_keyboard=get_med_confirm_keyboard())
-    
 def handle_vitals(_: str) -> None:
     result = add_credits("Manual Vitals Check", POINTS["vitals"])
     send_message(
@@ -422,11 +370,21 @@ KEYWORD_MAP = {
     
     "log meds":  handle_log_meds_start, # Move this to the top
     
-    # 2. SUB-MENU NAVIGATION
+    # Main Navigation
     "sanctuary": handle_sanctuary,
-    "meds":      handle_meds_menu,      # General 'meds' comes after 'log meds'
-    "quests":    handle_quest_hub,
-    "vitals":    handle_vitals_hub,
+    "meds":      handle_meds_menu,
+    "back":      handle_back,
+    "⬅️":       handle_back,
+
+    # Meds Sub-menuuSpecifics
+    "log meds":  med_hub.start_sequence,
+    "taken":     med_hub.process_confirmation,
+    "skip":      med_hub.process_confirmation,
+    "schedule":  med_hub.view_schedule, # You can move view_schedule there too
+    
+    # SUB-MENU NAVIGATION
+    "meds":      handle_meds_node,
+    "sanctuary": handle_sanctuary,
     "back":      handle_back,
     "⬅️":       handle_back,
     
