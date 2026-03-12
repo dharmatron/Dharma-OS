@@ -4,20 +4,22 @@ import pytz
 from config import MED_SCHEDULE, TIMEZONE
 from data import load_data, save_data, add_credits
 from telegram_client import (
-    send_message, get_meds_keyboard, get_med_confirm_keyboard
+    send_message, 
+    get_meds_keyboard, 
+    get_med_confirm_keyboard
 )
 
 logger = logging.getLogger(__name__)
 
 def _get_current_window():
-
+    """Prioritizes temporary shifts before defaulting to config.py."""
     data = load_data()
     overrides = data.get("schedule_overrides", {})
     
     cdmx_tz = pytz.timezone(TIMEZONE)
     now_hour = datetime.now(cdmx_tz).hour
 
-    # 1. Check for Overrides (Shifted Windows)
+    # 1. Check Overrides first (Shifted Windows)
     # If 08:00 was shifted to 10:00, and it's now 10:00, return '08:00'
     for original_time, details in overrides.items():
         shifted_time = details.get("new_time")
@@ -26,7 +28,7 @@ def _get_current_window():
             if abs(sh - now_hour) <= 2:
                 return original_time
 
-    # 2. Check Default Schedule
+    # 2. Fallback to default MED_SCHEDULE
     # Only returns a window if it hasn't been explicitly overridden
     for window in MED_SCHEDULE.keys():
         if window not in overrides:
