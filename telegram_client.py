@@ -5,7 +5,7 @@ All Telegram API calls live here. Clean separation from business logic.
 import json
 import logging
 import requests
-from config import TOKEN, CHAT_ID, EMERGENCY_CIRCLE, ALERT_LEVELS
+from config import TOKEN, CHAT_ID, MED_SCHEDULE, EMERGENCY_CIRCLE, ALERT_LEVELS
 
 logger = logging.getLogger(__name__)
 BASE_URL = f"https://api.telegram.org/bot{TOKEN}"
@@ -31,11 +31,12 @@ def get_meds_keyboard() -> dict:
     return {
         "keyboard": [
             [{"text": "💉 Log Meds"},     {"text": "📋 View Schedule"}],
-            [{"text": "⚙️ Change Meds"},  {"text": "⬅️ Back"}]
+            [{"text": "🕒 Retro Log"},    {"text": "⚙️ Change Meds"}], 
+            [{"text": "⬅️ Back"}]
         ],
         "resize_keyboard": True
     }
-
+    
 def get_med_confirm_keyboard() -> dict:
     """The interactive Yes/No confirmation for medications."""
     return {
@@ -45,6 +46,13 @@ def get_med_confirm_keyboard() -> dict:
         ],
         "resize_keyboard": True
     }
+
+def get_retro_windows_keyboard() -> dict:
+    """Generates buttons for each time slot window in MED_SCHEDULE."""
+    from config import MED_SCHEDULE
+    buttons = [[{"text": f"Log {time}"}] for time in MED_SCHEDULE.keys()]
+    buttons.append([{"text": "⬅️ Back to Meds"}])
+    return {"keyboard": buttons, "resize_keyboard": True}
 
 def get_vitals_keyboard() -> dict:
     """The Diagnostic entry hub."""
