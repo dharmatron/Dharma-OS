@@ -17,34 +17,11 @@ _scheduler_thread = None
 _stop_event = threading.Event()
 
 def _check_schedule():
-    """Check if any meds are due right now and send reminders."""
-    import pytz
-    cdmx_tz = pytz.timezone(TIMEZONE)
-    now = datetime.now(cdmx_tz)
-    now_time = now.strftime("%H:%M")
-    today = now.strftime("%Y-%m-%d")
-
-    data = load_data()
-    
-    if time.time() < data.get("snooze_until", 0):
-        return
-
-    for med_time, med_name in MED_SCHEDULE.items():
-        if now_time == med_time:
-            if not check_meds_taken_today(med_name):
-                send_message(
-                    f"🔔 *REMINDER*: {med_name} due."
-                    f"Scheduled: {med_time}\n"
-                    f"Window closes in 30 minutes.\n\n"
-                    f"Tap 💊 Meds when taken!"
-                )
-                logger.info(f"Reminder sent for: {med_name}")
-                time.sleep(61)
-                
-                if data.get("flare_mode", False):
-                    from data import set_snooze
-                    set_snooze(30)
-                                
+    now_time = datetime.now(pytz.timezone(TIMEZONE)).strftime("%H:%M")
+    if now_time in MED_SCHEDULE:
+        # Instead of just a message, trigger the sequence
+        from handlers import handle_log_meds_start
+        handle_log_meds_start(f"Scheduled: {now_time}")
 
 def _daily_init():  # Award System Init credits once per day on first run #
     
