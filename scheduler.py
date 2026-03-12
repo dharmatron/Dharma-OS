@@ -17,11 +17,28 @@ _scheduler_thread = None
 _stop_event = threading.Event()
 
 def _check_schedule():
+    """Checks the clock and triggers the interactive med sequence."""
     now_time = datetime.now(pytz.timezone(TIMEZONE)).strftime("%H:%M")
+    
     if now_time in MED_SCHEDULE:
-        # Instead of just a message, trigger the sequence
-        from handlers import handle_log_meds_start
-        handle_log_meds_start(f"Scheduled: {now_time}")
+        # We call the handler directly. 
+        # The handler now contains 'data.get("med_session")' logic 
+        # to ensure it doesn't restart if you're already logging.
+        handle_log_meds_start(f"Scheduled Alert: {now_time}")
+
+def start():
+    def loop():
+        while True:
+            try:
+                _daily_init()     # Check for +50 daily points
+                _check_schedule() # Check for medication windows
+            except Exception as e:
+                print(f"Scheduler error: {e}")
+            
+            # Sleep for 60 seconds so we don't trigger the same minute twice
+            time.sleep(60) 
+
+    threading.Thread(target=loop, daemon=True).start()
 
 def _daily_init():  # Award System Init credits once per day on first run #
     
