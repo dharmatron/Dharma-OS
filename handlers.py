@@ -380,12 +380,16 @@ KEYWORD_MAP = {
     "log meds":  med_hub.start_sequence,
     "taken":     med_hub.process_confirmation,
     "skip":      med_hub.process_confirmation,
-    "schedule":  med_hub.view_schedule, # You can move view_schedule there too
+    "schedule":  med_hub.view_schedule,
+    "change":    med_hub.handle_change_meds_start,
+    "shift":     med_hub.apply_med_override,
+    "edit":      med_hub.apply_med_override,# You can move view_schedule there too
     
     # SUB-MENU NAVIGATION
     "meds":      handle_meds_node,
     "sanctuary": handle_sanctuary,
     "back":      handle_back,
+    
     "⬅️":       handle_back,
     
     # 3. CONFIRMATIONS & TOGGLES
