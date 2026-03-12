@@ -111,6 +111,27 @@ def handle_meds_menu(text: str):
         custom_keyboard=get_meds_keyboard()
     )
 
+def handle_log_meds_start(text: str):
+    data = load_data()
+    
+    # Check if a session is already active to prevent double-prompts
+    if data.get("med_session"):
+        logger.info("💊 Med session already in progress. Skipping trigger.")
+        return
+
+    window = _get_current_window()
+    if not window:
+        send_message("⚠️ No active med window found.")
+        return
+    
+    meds = MED_SCHEDULE[window].split(" + ")
+    data["med_session"] = {"window": window, "meds": meds, "index": 0}
+    save_data(data)
+    
+    # The Alert Message
+    msg = f💊 *MEDS TIME: {window}*\nNext: **{meds[0]}**\nConfirm intake:"
+    send_message(msg, with_menu=True, custom_keyboard=get_med_confirm_keyboard())
+    
 def handle_vitals(_: str) -> None:
     result = add_credits("Manual Vitals Check", POINTS["vitals"])
     send_message(
