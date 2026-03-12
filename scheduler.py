@@ -17,13 +17,13 @@ _scheduler_thread = None
 _stop_event = threading.Event()
 
 def _check_schedule():
-    """Checks the clock and triggers the interactive med sequence."""
-    now_time = datetime.now(pytz.timezone(TIMEZONE)).strftime("%H:%M")
+    cdmx_tz = pytz.timezone("America/Mexico_City")
+    now_dt = datetime.now(cdmx_tz)
+    now_time = now_dt.strftime("%H:%M")
     
+    # Check if we are EXACTLY at a scheduled time
     if now_time in MED_SCHEDULE:
-        # We call the handler directly. 
-        # The handler now contains 'data.get("med_session")' logic 
-        # to ensure it doesn't restart if you're already logging.
+        from handlers import handle_log_meds_start
         handle_log_meds_start(f"Scheduled Alert: {now_time}")
 
 def start():
