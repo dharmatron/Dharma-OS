@@ -129,7 +129,7 @@ def handle_log_meds_start(text: str):
     save_data(data)
     
     # The Alert Message
-    msg = f💊 *MEDS TIME: {window}*\nNext: **{meds[0]}**\nConfirm intake:"
+    msg = f"💊 *MEDS TIME: {window}*\nNext: **{meds[0]}**\nConfirm intake:"
     send_message(msg, with_menu=True, custom_keyboard=get_med_confirm_keyboard())
     
 def handle_vitals(_: str) -> None:
