@@ -63,22 +63,25 @@ def start_sequence(text: str = None):
     send_message(msg, with_menu=True, custom_keyboard=get_med_confirm_keyboard())
 
 def process_confirmation(text: str):
-    """Logs the med as TAKEN or SKIPPED and moves to the next."""
+    #Logs the med as TAKEN or SKIPPED and moves to the next.#
     data = load_data()
     session = data.get("med_session")
-    
-    if not session:
-        return # Silent fail if no session active
+    if not session: return
 
-    # 1. Determine precision status
     is_taken = any(word in text.lower() for word in ["yes", "✅", "taken"])
     current_med = session["meds"][session["index"]]
     
-    status_label = "TAKEN" if is_taken else "SKIPPED"
-    points = 30 if is_taken else 0
+    # 1. Determine precision status
+    if is_taken:
+        # If it's a retro log, give 15. If normal, give 30.
+        points = 15 if session.get("is_retro") else 30
+        status = "TAKEN (RETRO)" if session.get("is_retro") else "TAKEN"
+    else:
+        points = 0
+        status = "SKIPPED"
     
     # 2. Log to history (Essential for medical review)
-    add_credits(f"Med: {current_med} ({status_label})", points)
+    add_credits(f"Med: {current_med} ({status})", points)
     
     # 3. Advance Index
     session["index"] += 1
@@ -98,8 +101,7 @@ def process_confirmation(text: str):
         send_message(
             "🏁 *Protocol Complete.*\nAll medications logged for this window.", 
             with_menu=True, 
-            custom_keyboard=get_meds_keyboard()
-        )
+            custom_keyboard=get_meds_keyboard())
 
 def view_schedule(text: str):
     """Outputs the full medication table."""
@@ -120,18 +122,48 @@ def handle_change_meds_start(text: str):
     send_message(msg, with_menu=True, custom_keyboard=get_meds_keyboard())
 
 def apply_med_override(text: str):
-    """Parses and applies temporary changes to the schedule."""
+    """Parses and applies temporary changes (e.g., 'shift 08:00 to 09:00')."""
     data = load_data()
     overrides = data.get("schedule_overrides", {})
-    
-    # Simple parsing logic for 'shift 08:00 to 09:00'
-    if "shift" in text.lower():
-        parts = text.split()
-        try:
+
+    try:
+        if "shift" in text.lower():
+            parts = text.split()
             old_time, new_time = parts[1], parts[3]
             overrides[old_time] = {"new_time": new_time}
-            data["schedule_overrides"] = overrides
-            save_data(data)
-            send_message(f"✅ Time Shifted: {old_time} is now {new_time}.", with_menu=True)
-        except:
-            send_message("❌ Format Error. Use: `shift 08:00 to 09:00`.", with_menu=True)
+            msg = f"✅ Window {old_time} shifted to {new_time}."
+        
+        data["schedule_overrides"] = overrides
+        save_data(data)
+        send_message(msg, with_menu=True)
+    except Exception:
+        send_message("❌ Format Error. Try: `shift 08:00 to 09:00`", with_menu=True)
+
+def start_retroactive_log(text: str):
+    """Allows the Architect to log a missed window manually."""
+    msg = "🕒 *RETROACTIVE LOGGING*\nSelect the window you wish to log entry for:"
+    # We will create a specific keyboard for this in Step 2
+    from telegram_client import get_retro_windows_keyboard
+    send_message(msg, with_menu=True, custom_keyboard=get_retro_windows_keyboard())
+
+def init_retro_session(window: str):
+    """Starts the sequential log for a specific past window."""
+    data = load_data()
+    if window not in MED_SCHEDULE:
+        send_message("❌ Invalid window selection.", with_menu=True)
+        return
+
+    meds_list = [m.strip() for m in MED_SCHEDULE[window].split("+")]
+    # We flag this session as 'retro' so the points are adjusted
+    data["med_session"] = {
+        "window": window,
+        "meds": meds_list,
+        "index": 0,
+        "is_retro": True 
+    }
+    save_data(data)
+    
+    msg = f"📝 *RETRO LOG: {window}*\nNext: **{meds_list[0]}**\nConfirm intake:"
+    send_message(msg, with_menu=True, custom_keyboard=get_med_confirm_keyboard())
+
+
