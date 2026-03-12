@@ -421,7 +421,6 @@ COMMAND_MAP = {
 KEYWORD_MAP = {
     
     "log meds":  handle_log_meds_start, # Move this to the top
-    "export walmart": handle_export_walmart,
     
     # 2. SUB-MENU NAVIGATION
     "sanctuary": handle_sanctuary,
