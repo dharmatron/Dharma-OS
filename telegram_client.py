@@ -16,9 +16,9 @@ def get_main_keyboard() -> dict:
     """The central navigation hub."""
     return {
         "keyboard": [
-            [{"text": "💊 Meds"},         {"text": "📊 Vitals"}],
-            [{"text": "🥤 Electrolytes"}, {"text": "⚔️ Quests"}], 
-            [{"text": "✨ Sanctuary"},    {"text": "🚨 Flare Mode"}], 
+            [{"text": "💊 Meds"}, {"text": "📊 Vitals"}],
+            [{"text": "✨ Sanctuary"}, {"text": "⚔️ Quests"}],  
+            [{"text": "🥤 Electrolytes"}, {"text": "🚨 Flare Mode"}],
             [{"text": "💤 Snooze 15m"}, {"text": "🏁 Milestones"}],
             [{"text": "📷 Scan Monitor"}, {"text": "✏️ Custom"}], 
             [{"text": "📈 Status"}, {"text": "🛠️ Fix Last"}, {"text": "📤 Export"}]
@@ -27,11 +27,31 @@ def get_main_keyboard() -> dict:
     }
 
 def get_meds_keyboard() -> dict:
-    """The Medication Node."""
+    """The Medication Management Hub."""
     return {
         "keyboard": [
             [{"text": "💉 Log Meds"},     {"text": "📋 View Schedule"}],
             [{"text": "⚙️ Change Meds"},  {"text": "⬅️ Back"}]
+        ],
+        "resize_keyboard": True
+    }
+
+def get_med_confirm_keyboard() -> dict:
+    """The interactive Yes/No confirmation for medications."""
+    return {
+        "keyboard": [
+            [{"text": "✅ Yes (Taken)"}, {"text": "❌ No (Skip)"}],
+            [{"text": "⬅️ Back to Meds"}]
+        ],
+        "resize_keyboard": True
+    }
+
+def get_vitals_keyboard() -> dict:
+    """The Diagnostic entry hub."""
+    return {
+        "keyboard": [
+            [{"text": "📸 Scan Oximeter"}, {"text": "📸 Scan BP"}],
+            [{"text": "🔢 Manual Entry"}, {"text": "⬅️ Back"}]
         ],
         "resize_keyboard": True
     }
@@ -45,6 +65,16 @@ def get_sanctuary_keyboard() -> dict:
             [{"text": "🐕 Umi walkies"}, {"text": "🧘 Meditation"}],
             [{"text": "🧹 Room"},         {"text": "👕 Laundry"}],
             [{"text": "⬅️ Back"}]
+        ],
+        "resize_keyboard": True
+    }
+    
+def get_quest_keyboard() -> dict:
+    """The Action/Task management hub."""
+    return {
+        "keyboard": [
+            [{"text": "📋 View All"}, {"text": "🛒 Export Walmart"}],
+            [{"text": "🧹 Clear Done"}, {"text": "⬅️ Back"}]
         ],
         "resize_keyboard": True
     }
