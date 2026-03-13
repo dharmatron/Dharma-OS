@@ -27,16 +27,14 @@ def get_main_keyboard() -> dict:
     }
 
 def get_meds_keyboard() -> dict:
-    """The Medication Management Hub."""
     return {
         "keyboard": [
-            [{"text": "💉 Log Meds"},     {"text": "📋 View Schedule"}],
-            [{"text": "🕒 Retro Log"},    {"text": "⚙️ Change Meds"}], 
-            [{"text": "⬅️ Back"}]
-        ],
+            [{"text": "💉 Log Meds"}, {"text": "📋 View Schedule"}], 
+            [{"text": "🕒 Retro Log"}, {"text": "⚙️ Change Meds"}], 
+            [{"text": "⬅️ Back"}]],
         "resize_keyboard": True
     }
-    
+
 def get_med_confirm_keyboard() -> dict:
     """The interactive Yes/No confirmation for medications."""
     return {
@@ -46,11 +44,12 @@ def get_med_confirm_keyboard() -> dict:
         ],
         "resize_keyboard": True
     }
-
+    
 def get_retro_windows_keyboard() -> dict:
-    """Generates buttons for each time slot window in MED_SCHEDULE."""
     from config import MED_SCHEDULE
-    buttons = [[{"text": f"Log {time}"}] for time in MED_SCHEDULE.keys()]
+    keys = list(MED_SCHEDULE.keys())
+    # Note: Button text must match the KEYWORD_MAP (e.g., 'Log 06:00')
+    buttons = [[{"text": f"Log {keys[i]}"}, {"text": f"Log {keys[i+1]}"}] if i+1 < len(keys) else [{"text": f"Log {keys[i]}"}] for i in range(0, len(keys), 2)]
     buttons.append([{"text": "⬅️ Back to Meds"}])
     return {"keyboard": buttons, "resize_keyboard": True}
 
